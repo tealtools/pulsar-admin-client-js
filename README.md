@@ -11,7 +11,7 @@ For our project we needed it to setup better test environment.
 ## Usage
 
 ```shell
-npm i @tealtools/pulsar-admin-client
+npm i pulsar-admin-client
 ```
 
 ```typescript
