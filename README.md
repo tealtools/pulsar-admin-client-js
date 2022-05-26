@@ -13,3 +13,10 @@ For our project we needed it to setup better test environment.
 ```shell
 npm i @tealtools/pulsar-admin-client
 ```
+
+```typescript
+import * as pulsarAdmin from "pulsar-admin-client";
+
+const tenantsClient = new pulsarAdmin.TenantsApi("pulsar://localhost:6650");
+await tenantsClient.createTenant("my-tenant");
+```
