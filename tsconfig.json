@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "types": ["node"],
+    "module": "ESNext",
+    "target": "ESNext",
+    "declaration": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true
+  }
+}
