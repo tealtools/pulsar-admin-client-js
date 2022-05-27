@@ -19,7 +19,7 @@ import * as pulsarAdmin from "pulsar-admin-client";
 
 const pulsarAdminClient = new pulsarAdmin.Client({ BASE: "http://localhost:8080/admin/v2" });
   await pulsarAdminClient.tenants.createTenant(
-    config.pulsarTenant,
+    "new-tenant",
     { allowedClusters: ["standalone"] }
   );
 ```
