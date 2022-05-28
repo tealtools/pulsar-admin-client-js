@@ -7,6 +7,7 @@ publish: ## Publish packages.
 	cd ./axios && npm version patch 
 	cd ./node && npm version patch
 
+	git add .
 	git commit -m "Bump version"
 	git push
 
