@@ -8,8 +8,8 @@ publish: ## Publish packages.
 
 .PHONY: build
 build: ## Build packages.
-	cd ./axios && make build
-	cd ./node && make build
+	cd ./axios && npm run build
+	cd ./node && npm run build
 
 .PHONY: help
 help:
