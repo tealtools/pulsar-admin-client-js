@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2017",
+    "declaration": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "skipDefaultLibCheck": true,
+    "outDir": "./dist",
+    "esModuleInterop": true
+  }
+}
