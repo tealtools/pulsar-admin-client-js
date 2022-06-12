@@ -2524,12 +2524,6 @@
           "type" : "string"
         } ],
         "responses" : {
-          "200" : {
-            "description" : "successful operation",
-            "schema" : {
-              "$ref" : "#/definitions/DispatchRate"
-            }
-          },
           "403" : {
             "description" : "Don't have admin permission"
           },
@@ -5169,12 +5163,6 @@
           "type" : "string"
         } ],
         "responses" : {
-          "200" : {
-            "description" : "successful operation",
-            "schema" : {
-              "$ref" : "#/definitions/SubscribeRate"
-            }
-          },
           "403" : {
             "description" : "Don't have admin permission"
           },
@@ -10515,6 +10503,64 @@
         }
       }
     },
+    "/non-persistent/{tenant}/{namespace}/{topic}/properties" : {
+      "get" : {
+        "tags" : [ "non-persistent topic" ],
+        "summary" : "Get topic properties.",
+        "description" : "",
+        "operationId" : "getProperties",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "tenant",
+          "in" : "path",
+          "description" : "Specify the tenant",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "namespace",
+          "in" : "path",
+          "description" : "Specify the namespace",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "topic",
+          "in" : "path",
+          "description" : "Specify topic name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "authoritative",
+          "in" : "query",
+          "description" : "Is authentication required to perform this operation",
+          "required" : false,
+          "type" : "boolean",
+          "default" : false
+        } ],
+        "responses" : {
+          "307" : {
+            "description" : "Current broker doesn't serve the namespace of this topic"
+          },
+          "401" : {
+            "description" : "Don't have permission to administrate resources on this tenant"
+          },
+          "403" : {
+            "description" : "Don't have admin permission"
+          },
+          "404" : {
+            "description" : "Topic does not exist"
+          },
+          "409" : {
+            "description" : "Concurrent modification"
+          },
+          "412" : {
+            "description" : "Topic name is invalid"
+          },
+          "500" : {
+            "description" : "Internal server error"
+          }
+        }
+      }
+    },
     "/non-persistent/{tenant}/{namespace}/{topic}/publishRate" : {
       "get" : {
         "tags" : [ "non-persistent topic" ],
@@ -11970,6 +12016,81 @@
           },
           "412" : {
             "description" : "Topic name is not valid"
+          },
+          "500" : {
+            "description" : "Internal server error"
+          },
+          "503" : {
+            "description" : "Failed to validate global cluster configuration"
+          }
+        }
+      }
+    },
+    "/non-persistent/{tenant}/{namespace}/{topic}/subscription/{subName}/properties" : {
+      "put" : {
+        "tags" : [ "non-persistent topic" ],
+        "summary" : "Replaces all the properties on the given subscription",
+        "description" : "",
+        "operationId" : "updateSubscriptionProperties",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "tenant",
+          "in" : "path",
+          "description" : "Specify the tenant",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "namespace",
+          "in" : "path",
+          "description" : "Specify the namespace",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "topic",
+          "in" : "path",
+          "description" : "Specify topic name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "subName",
+          "in" : "path",
+          "description" : "Subscription to update",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "The new properties",
+          "required" : false,
+          "schema" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          }
+        }, {
+          "name" : "authoritative",
+          "in" : "query",
+          "description" : "Is authentication required to perform this operation",
+          "required" : false,
+          "type" : "boolean",
+          "default" : false
+        } ],
+        "responses" : {
+          "307" : {
+            "description" : "Current broker doesn't serve the namespace of this topic"
+          },
+          "401" : {
+            "description" : "Don't have permission to administrate resources on this tenant orsubscriber is not authorized to access this operation"
+          },
+          "403" : {
+            "description" : "Don't have admin permission"
+          },
+          "404" : {
+            "description" : "Topic/Subscription does not exist"
+          },
+          "405" : {
+            "description" : "Method Not Allowed"
           },
           "500" : {
             "description" : "Internal server error"
@@ -17192,7 +17313,6 @@
         "summary" : "Create a partitioned topic.",
         "description" : "It needs to be called before creating a producer on a partitioned topic.",
         "operationId" : "createPartitionedTopic",
-        "consumes" : [ "application/vnd.partitioned-topic-metadata+json" ],
         "produces" : [ "application/json" ],
         "parameters" : [ {
           "name" : "tenant",
@@ -17215,10 +17335,12 @@
         }, {
           "in" : "body",
           "name" : "body",
-          "description" : "The metadata for the topic",
+          "description" : "The number of partitions for the topic",
           "required" : true,
           "schema" : {
-            "$ref" : "#/definitions/PartitionedTopicMetadata"
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
           }
         }, {
           "name" : "createLocalTopicOnly",
@@ -17652,6 +17774,64 @@
           },
           "409" : {
             "description" : "Concurrent modification"
+          }
+        }
+      }
+    },
+    "/persistent/{tenant}/{namespace}/{topic}/properties" : {
+      "get" : {
+        "tags" : [ "persistent topic" ],
+        "summary" : "Get topic properties.",
+        "description" : "",
+        "operationId" : "getProperties",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "tenant",
+          "in" : "path",
+          "description" : "Specify the tenant",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "namespace",
+          "in" : "path",
+          "description" : "Specify the namespace",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "topic",
+          "in" : "path",
+          "description" : "Specify topic name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "authoritative",
+          "in" : "query",
+          "description" : "Is authentication required to perform this operation",
+          "required" : false,
+          "type" : "boolean",
+          "default" : false
+        } ],
+        "responses" : {
+          "307" : {
+            "description" : "Current broker doesn't serve the namespace of this topic"
+          },
+          "401" : {
+            "description" : "Don't have permission to administrate resources on this tenant"
+          },
+          "403" : {
+            "description" : "Don't have admin permission"
+          },
+          "404" : {
+            "description" : "Topic does not exist"
+          },
+          "409" : {
+            "description" : "Concurrent modification"
+          },
+          "412" : {
+            "description" : "Topic name is invalid"
+          },
+          "500" : {
+            "description" : "Internal server error"
           }
         }
       }
@@ -19111,6 +19291,81 @@
           },
           "412" : {
             "description" : "Topic name is not valid"
+          },
+          "500" : {
+            "description" : "Internal server error"
+          },
+          "503" : {
+            "description" : "Failed to validate global cluster configuration"
+          }
+        }
+      }
+    },
+    "/persistent/{tenant}/{namespace}/{topic}/subscription/{subName}/properties" : {
+      "put" : {
+        "tags" : [ "persistent topic" ],
+        "summary" : "Replaces all the properties on the given subscription",
+        "description" : "",
+        "operationId" : "updateSubscriptionProperties",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "tenant",
+          "in" : "path",
+          "description" : "Specify the tenant",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "namespace",
+          "in" : "path",
+          "description" : "Specify the namespace",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "topic",
+          "in" : "path",
+          "description" : "Specify topic name",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "subName",
+          "in" : "path",
+          "description" : "Subscription to update",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "body",
+          "description" : "The new properties",
+          "required" : false,
+          "schema" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          }
+        }, {
+          "name" : "authoritative",
+          "in" : "query",
+          "description" : "Is authentication required to perform this operation",
+          "required" : false,
+          "type" : "boolean",
+          "default" : false
+        } ],
+        "responses" : {
+          "307" : {
+            "description" : "Current broker doesn't serve the namespace of this topic"
+          },
+          "401" : {
+            "description" : "Don't have permission to administrate resources on this tenant orsubscriber is not authorized to access this operation"
+          },
+          "403" : {
+            "description" : "Don't have admin permission"
+          },
+          "404" : {
+            "description" : "Topic/Subscription does not exist"
+          },
+          "405" : {
+            "description" : "Method Not Allowed"
           },
           "500" : {
             "description" : "Internal server error"
@@ -20745,7 +21000,7 @@
         }, {
           "in" : "body",
           "name" : "body",
-          "description" : "A JSON value presenting a schema playload. An example of the expected schema can be found down here.",
+          "description" : "A JSON value presenting a schema payload. An example of the expected schema can be found down here.",
           "required" : false,
           "schema" : {
             "$ref" : "#/definitions/PostSchemaPayload"
@@ -20869,7 +21124,7 @@
         }, {
           "in" : "body",
           "name" : "body",
-          "description" : "A JSON value presenting a schema playload. An example of the expected schema can be found down here.",
+          "description" : "A JSON value presenting a schema payload. An example of the expected schema can be found down here.",
           "required" : false,
           "schema" : {
             "$ref" : "#/definitions/PostSchemaPayload"
@@ -21124,7 +21379,7 @@
         }, {
           "in" : "body",
           "name" : "body",
-          "description" : "A JSON value presenting a schema playload. An example of the expected schema can be found down here.",
+          "description" : "A JSON value presenting a schema payload. An example of the expected schema can be found down here.",
           "required" : false,
           "schema" : {
             "$ref" : "#/definitions/PostSchemaPayload"
@@ -21686,16 +21941,6 @@
     "AuthPolicies" : {
       "type" : "object",
       "properties" : {
-        "subscriptionAuthentication" : {
-          "type" : "object",
-          "additionalProperties" : {
-            "type" : "array",
-            "uniqueItems" : true,
-            "items" : {
-              "type" : "string"
-            }
-          }
-        },
         "namespaceAuthentication" : {
           "type" : "object",
           "additionalProperties" : {
@@ -21704,6 +21949,16 @@
             "items" : {
               "type" : "string",
               "enum" : [ "produce", "consume", "functions", "sources", "sinks", "packages" ]
+            }
+          }
+        },
+        "subscriptionAuthentication" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "array",
+            "uniqueItems" : true,
+            "items" : {
+              "type" : "string"
             }
           }
         },
@@ -21729,7 +21984,7 @@
         "peerAddress" : {
           "$ref" : "#/definitions/SocketAddress"
         },
-        "commandData" : {
+        "subscription" : {
           "type" : "string"
         },
         "tlsCertificates" : {
@@ -21741,7 +21996,7 @@
         "httpAuthType" : {
           "type" : "string"
         },
-        "subscription" : {
+        "commandData" : {
           "type" : "string"
         }
       }
@@ -21791,10 +22046,6 @@
           "type" : "string",
           "enum" : [ "producer_request_hold", "producer_exception", "consumer_backlog_eviction" ]
         },
-        "limit" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
         "limitSize" : {
           "type" : "integer",
           "format" : "int64"
@@ -21802,6 +22053,10 @@
         "limitTime" : {
           "type" : "integer",
           "format" : "int32"
+        },
+        "limit" : {
+          "type" : "integer",
+          "format" : "int64"
         }
       }
     },
@@ -21838,10 +22093,10 @@
     "BookieInfo" : {
       "type" : "object",
       "properties" : {
-        "rack" : {
+        "hostname" : {
           "type" : "string"
         },
-        "hostname" : {
+        "rack" : {
           "type" : "string"
         }
       }
@@ -22091,6 +22346,60 @@
         }
       }
     },
+    "CompletableFutureListSchemaAndMetadata" : {
+      "type" : "object",
+      "properties" : {
+        "cancelled" : {
+          "type" : "boolean"
+        },
+        "done" : {
+          "type" : "boolean"
+        },
+        "numberOfDependents" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "completedExceptionally" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "CompletableFutureLong" : {
+      "type" : "object",
+      "properties" : {
+        "cancelled" : {
+          "type" : "boolean"
+        },
+        "done" : {
+          "type" : "boolean"
+        },
+        "numberOfDependents" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "completedExceptionally" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "CompletableFuturePairBooleanSchemaCompatibilityStrategy" : {
+      "type" : "object",
+      "properties" : {
+        "cancelled" : {
+          "type" : "boolean"
+        },
+        "done" : {
+          "type" : "boolean"
+        },
+        "numberOfDependents" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "completedExceptionally" : {
+          "type" : "boolean"
+        }
+      }
+    },
     "CompletableFuturePartitionedTopicMetadata" : {
       "type" : "object",
       "properties" : {
@@ -22110,6 +22419,42 @@
       }
     },
     "CompletableFutureResourceQuota" : {
+      "type" : "object",
+      "properties" : {
+        "cancelled" : {
+          "type" : "boolean"
+        },
+        "done" : {
+          "type" : "boolean"
+        },
+        "numberOfDependents" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "completedExceptionally" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "CompletableFutureSchemaAndMetadata" : {
+      "type" : "object",
+      "properties" : {
+        "cancelled" : {
+          "type" : "boolean"
+        },
+        "done" : {
+          "type" : "boolean"
+        },
+        "numberOfDependents" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "completedExceptionally" : {
+          "type" : "boolean"
+        }
+      }
+    },
+    "CompletableFutureSchemaVersion" : {
       "type" : "object",
       "properties" : {
         "cancelled" : {
@@ -22311,14 +22656,14 @@
     "DeserializationConfig" : {
       "type" : "object",
       "properties" : {
+        "nodeFactory" : {
+          "$ref" : "#/definitions/JsonNodeFactory"
+        },
         "annotationIntrospector" : {
           "$ref" : "#/definitions/AnnotationIntrospector"
         },
         "defaultPropertyInclusion" : {
           "$ref" : "#/definitions/Value"
-        },
-        "nodeFactory" : {
-          "$ref" : "#/definitions/JsonNodeFactory"
         },
         "deserializationFeatures" : {
           "type" : "integer",
@@ -22330,11 +22675,11 @@
         "attributes" : {
           "$ref" : "#/definitions/ContextAttributes"
         },
-        "rootName" : {
-          "type" : "string"
-        },
         "subtypeResolver" : {
           "$ref" : "#/definitions/SubtypeResolver"
+        },
+        "rootName" : {
+          "type" : "string"
         },
         "fullRootName" : {
           "$ref" : "#/definitions/PropertyName"
@@ -22348,17 +22693,17 @@
         "timeZone" : {
           "$ref" : "#/definitions/TimeZone"
         },
+        "dateFormat" : {
+          "$ref" : "#/definitions/DateFormat"
+        },
         "typeFactory" : {
           "$ref" : "#/definitions/TypeFactory"
-        },
-        "handlerInstantiator" : {
-          "$ref" : "#/definitions/HandlerInstantiator"
         },
         "propertyNamingStrategy" : {
           "$ref" : "#/definitions/PropertyNamingStrategy"
         },
-        "dateFormat" : {
-          "$ref" : "#/definitions/DateFormat"
+        "handlerInstantiator" : {
+          "$ref" : "#/definitions/HandlerInstantiator"
         },
         "base64Variant" : {
           "$ref" : "#/definitions/Base64Variant"
@@ -22383,20 +22728,20 @@
         "timeZone" : {
           "$ref" : "#/definitions/TimeZone"
         },
+        "nodeFactory" : {
+          "$ref" : "#/definitions/JsonNodeFactory"
+        },
+        "typeFactory" : {
+          "$ref" : "#/definitions/TypeFactory"
+        },
         "config" : {
           "$ref" : "#/definitions/DeserializationConfig"
         },
         "parser" : {
           "$ref" : "#/definitions/JsonParser"
         },
-        "typeFactory" : {
-          "$ref" : "#/definitions/TypeFactory"
-        },
         "annotationIntrospector" : {
           "$ref" : "#/definitions/AnnotationIntrospector"
-        },
-        "nodeFactory" : {
-          "$ref" : "#/definitions/JsonNodeFactory"
         },
         "contextualType" : {
           "$ref" : "#/definitions/JavaType"
@@ -22494,10 +22839,6 @@
         "oneMin" : {
           "$ref" : "#/definitions/FunctionInstanceStatsDataBase"
         },
-        "lastInvocation" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
         "userMetrics" : {
           "type" : "object",
           "additionalProperties" : {
@@ -22505,13 +22846,13 @@
             "format" : "double"
           }
         },
-        "receivedTotal" : {
+        "lastInvocation" : {
           "type" : "integer",
           "format" : "int64"
         },
-        "processedSuccessfullyTotal" : {
-          "type" : "integer",
-          "format" : "int64"
+        "avgProcessLatency" : {
+          "type" : "number",
+          "format" : "double"
         },
         "systemExceptionsTotal" : {
           "type" : "integer",
@@ -22521,22 +22862,22 @@
           "type" : "integer",
           "format" : "int64"
         },
-        "avgProcessLatency" : {
-          "type" : "number",
-          "format" : "double"
+        "receivedTotal" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "processedSuccessfullyTotal" : {
+          "type" : "integer",
+          "format" : "int64"
         }
       }
     },
     "FunctionInstanceStatsDataBase" : {
       "type" : "object",
       "properties" : {
-        "receivedTotal" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "processedSuccessfullyTotal" : {
-          "type" : "integer",
-          "format" : "int64"
+        "avgProcessLatency" : {
+          "type" : "number",
+          "format" : "double"
         },
         "systemExceptionsTotal" : {
           "type" : "integer",
@@ -22546,9 +22887,13 @@
           "type" : "integer",
           "format" : "int64"
         },
-        "avgProcessLatency" : {
-          "type" : "number",
-          "format" : "double"
+        "receivedTotal" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "processedSuccessfullyTotal" : {
+          "type" : "integer",
+          "format" : "int64"
         }
       }
     },
@@ -22716,16 +23061,10 @@
         "abstract" : {
           "type" : "boolean"
         },
-        "contentType" : {
-          "$ref" : "#/definitions/JavaType"
-        },
         "bindings" : {
           "$ref" : "#/definitions/TypeBindings"
         },
         "concrete" : {
-          "type" : "boolean"
-        },
-        "enumType" : {
           "type" : "boolean"
         },
         "keyType" : {
@@ -22738,6 +23077,9 @@
           "type" : "boolean"
         },
         "javaLangObject" : {
+          "type" : "boolean"
+        },
+        "enumType" : {
           "type" : "boolean"
         },
         "containerType" : {
@@ -22769,6 +23111,9 @@
         },
         "mapLikeType" : {
           "type" : "boolean"
+        },
+        "contentType" : {
+          "$ref" : "#/definitions/JavaType"
         },
         "typeName" : {
           "type" : "string"
@@ -22804,9 +23149,6 @@
     "JsonGenerator" : {
       "type" : "object",
       "properties" : {
-        "closed" : {
-          "type" : "boolean"
-        },
         "schema" : {
           "$ref" : "#/definitions/FormatSchema"
         },
@@ -22819,9 +23161,6 @@
         "prettyPrinter" : {
           "$ref" : "#/definitions/PrettyPrinter"
         },
-        "currentValue" : {
-          "type" : "object"
-        },
         "featureMask" : {
           "type" : "integer",
           "format" : "int32"
@@ -22829,6 +23168,9 @@
         "formatFeatures" : {
           "type" : "integer",
           "format" : "int32"
+        },
+        "currentValue" : {
+          "type" : "object"
         },
         "highestEscapedChar" : {
           "type" : "integer",
@@ -22843,6 +23185,9 @@
         },
         "outputContext" : {
           "$ref" : "#/definitions/JsonStreamContext"
+        },
+        "closed" : {
+          "type" : "boolean"
         }
       }
     },
@@ -22883,14 +23228,18 @@
         "text" : {
           "type" : "string"
         },
-        "closed" : {
-          "type" : "boolean"
-        },
         "textCharacters" : {
           "type" : "array",
           "items" : {
             "type" : "string"
           }
+        },
+        "intValue" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "typeId" : {
+          "type" : "object"
         },
         "booleanValue" : {
           "type" : "boolean"
@@ -22918,13 +23267,6 @@
         "objectId" : {
           "type" : "object"
         },
-        "intValue" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "typeId" : {
-          "type" : "object"
-        },
         "schema" : {
           "$ref" : "#/definitions/FormatSchema"
         },
@@ -22941,12 +23283,6 @@
         "tokenLocation" : {
           "$ref" : "#/definitions/JsonLocation"
         },
-        "inputSource" : {
-          "type" : "object"
-        },
-        "currentValue" : {
-          "type" : "object"
-        },
         "featureMask" : {
           "type" : "integer",
           "format" : "int32"
@@ -22954,20 +23290,6 @@
         "formatFeatures" : {
           "type" : "integer",
           "format" : "int32"
-        },
-        "valueAsLong" : {
-          "type" : "integer",
-          "format" : "int64"
-        },
-        "valueAsDouble" : {
-          "type" : "number",
-          "format" : "double"
-        },
-        "valueAsBoolean" : {
-          "type" : "boolean"
-        },
-        "valueAsString" : {
-          "type" : "string"
         },
         "currentTokenId" : {
           "type" : "integer",
@@ -23019,6 +23341,29 @@
         "valueAsInt" : {
           "type" : "integer",
           "format" : "int32"
+        },
+        "valueAsLong" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "valueAsDouble" : {
+          "type" : "number",
+          "format" : "double"
+        },
+        "valueAsBoolean" : {
+          "type" : "boolean"
+        },
+        "valueAsString" : {
+          "type" : "string"
+        },
+        "inputSource" : {
+          "type" : "object"
+        },
+        "currentValue" : {
+          "type" : "object"
+        },
+        "closed" : {
+          "type" : "boolean"
         }
       }
     },
@@ -23350,19 +23695,19 @@
           "type" : "number",
           "format" : "double"
         },
-        "cpu" : {
+        "bandwidthIn" : {
+          "$ref" : "#/definitions/ResourceUsage"
+        },
+        "bandwidthOut" : {
           "$ref" : "#/definitions/ResourceUsage"
         },
         "memory" : {
           "$ref" : "#/definitions/ResourceUsage"
         },
+        "cpu" : {
+          "$ref" : "#/definitions/ResourceUsage"
+        },
         "directMemory" : {
-          "$ref" : "#/definitions/ResourceUsage"
-        },
-        "bandwidthIn" : {
-          "$ref" : "#/definitions/ResourceUsage"
-        },
-        "bandwidthOut" : {
           "$ref" : "#/definitions/ResourceUsage"
         },
         "lastUpdate" : {
@@ -23695,8 +24040,8 @@
         "factory" : {
           "$ref" : "#/definitions/JsonFactory"
         },
-        "typeFactory" : {
-          "$ref" : "#/definitions/TypeFactory"
+        "injectableValues" : {
+          "$ref" : "#/definitions/InjectableValues"
         },
         "serializationConfig" : {
           "$ref" : "#/definitions/SerializationConfig"
@@ -23719,11 +24064,8 @@
         "visibilityChecker" : {
           "$ref" : "#/definitions/VisibilityCheckerObject"
         },
-        "subtypeResolver" : {
-          "$ref" : "#/definitions/SubtypeResolver"
-        },
-        "propertyNamingStrategy" : {
-          "$ref" : "#/definitions/PropertyNamingStrategy"
+        "typeFactory" : {
+          "$ref" : "#/definitions/TypeFactory"
         },
         "nodeFactory" : {
           "$ref" : "#/definitions/JsonNodeFactory"
@@ -23734,28 +24076,17 @@
         "dateFormat" : {
           "$ref" : "#/definitions/DateFormat"
         },
-        "injectableValues" : {
-          "$ref" : "#/definitions/InjectableValues"
+        "subtypeResolver" : {
+          "$ref" : "#/definitions/SubtypeResolver"
+        },
+        "propertyNamingStrategy" : {
+          "$ref" : "#/definitions/PropertyNamingStrategy"
         }
       }
     },
     "OffloadPolicies" : {
       "type" : "object",
       "properties" : {
-        "managedLedgerOffloadMaxThreads" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "managedLedgerOffloadPrefetchRounds" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "managedLedgerOffloadDriver" : {
-          "type" : "string"
-        },
-        "offloadersDirectory" : {
-          "type" : "string"
-        },
         "managedLedgerOffloadThresholdInBytes" : {
           "type" : "integer",
           "format" : "int64"
@@ -23763,6 +24094,20 @@
         "managedLedgerOffloadDeletionLagInMillis" : {
           "type" : "integer",
           "format" : "int64"
+        },
+        "offloadersDirectory" : {
+          "type" : "string"
+        },
+        "managedLedgerOffloadDriver" : {
+          "type" : "string"
+        },
+        "managedLedgerOffloadMaxThreads" : {
+          "type" : "integer",
+          "format" : "int32"
+        },
+        "managedLedgerOffloadPrefetchRounds" : {
+          "type" : "integer",
+          "format" : "int32"
         },
         "managedLedgerOffloadedReadPriority" : {
           "type" : "string",
@@ -24764,11 +25109,11 @@
         "attributes" : {
           "$ref" : "#/definitions/ContextAttributes"
         },
-        "rootName" : {
-          "type" : "string"
-        },
         "subtypeResolver" : {
           "$ref" : "#/definitions/SubtypeResolver"
+        },
+        "rootName" : {
+          "type" : "string"
         },
         "fullRootName" : {
           "$ref" : "#/definitions/PropertyName"
@@ -24782,17 +25127,17 @@
         "timeZone" : {
           "$ref" : "#/definitions/TimeZone"
         },
+        "dateFormat" : {
+          "$ref" : "#/definitions/DateFormat"
+        },
         "typeFactory" : {
           "$ref" : "#/definitions/TypeFactory"
-        },
-        "handlerInstantiator" : {
-          "$ref" : "#/definitions/HandlerInstantiator"
         },
         "propertyNamingStrategy" : {
           "$ref" : "#/definitions/PropertyNamingStrategy"
         },
-        "dateFormat" : {
-          "$ref" : "#/definitions/DateFormat"
+        "handlerInstantiator" : {
+          "$ref" : "#/definitions/HandlerInstantiator"
         },
         "base64Variant" : {
           "$ref" : "#/definitions/Base64Variant"
@@ -24817,14 +25162,11 @@
         "timeZone" : {
           "$ref" : "#/definitions/TimeZone"
         },
-        "generator" : {
-          "$ref" : "#/definitions/JsonGenerator"
+        "typeFactory" : {
+          "$ref" : "#/definitions/TypeFactory"
         },
         "config" : {
           "$ref" : "#/definitions/SerializationConfig"
-        },
-        "typeFactory" : {
-          "$ref" : "#/definitions/TypeFactory"
         },
         "annotationIntrospector" : {
           "$ref" : "#/definitions/AnnotationIntrospector"
@@ -24837,6 +25179,9 @@
         },
         "defaultNullKeySerializer" : {
           "$ref" : "#/definitions/JsonSerializerObject"
+        },
+        "generator" : {
+          "$ref" : "#/definitions/JsonGenerator"
         }
       }
     },
@@ -25488,23 +25833,23 @@
         "sources" : {
           "$ref" : "#/definitions/SourcesWorkerService"
         },
-        "initialized" : {
-          "type" : "boolean"
-        },
-        "workerConfig" : {
-          "$ref" : "#/definitions/WorkerConfig"
-        },
         "functions" : {
           "$ref" : "#/definitions/FunctionsWorkerService"
         },
-        "sinks" : {
-          "$ref" : "#/definitions/SinksWorkerService"
+        "initialized" : {
+          "type" : "boolean"
         },
         "functionsV2" : {
           "$ref" : "#/definitions/FunctionsV2WorkerService"
         },
         "workers" : {
           "$ref" : "#/definitions/WorkersWorkerService"
+        },
+        "sinks" : {
+          "$ref" : "#/definitions/SinksWorkerService"
+        },
+        "workerConfig" : {
+          "$ref" : "#/definitions/WorkerConfig"
         }
       }
     },
