@@ -4,22 +4,16 @@
 publish: ## Publish packages.
 	make build
 
-	cd ./axios && npm version patch 
-	cd ./node && npm version patch
 	cd ./fetch && npm version patch
 
 	git add .
 	git commit -m "Bump version"
 	git push
 
-	cd ./axios && npm publish
-	cd ./node && npm publish
 	cd ./fetch && npm publish
 
 .PHONY: build
 build: ## Build packages.
-	cd ./axios && npm i && npm run build
-	cd ./node && npm i && npm run build
 	cd ./fetch && npm i && npm run build
 
 .PHONY: help
