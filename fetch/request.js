@@ -210,7 +210,7 @@ const getResponseBody = async (response) => {
   return undefined;
 };
 const catchErrorCodes = (options, result) => {
-  if (result.status > 300) {
+  if (result.status > 300 && result.body !== undefined) {
     const reason = result.body.reason;
     if (
       result !== undefined &&
