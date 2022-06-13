@@ -145,8 +145,6 @@ const getHeaders = async (config, options) => {
       headers["Content-Type"] = options.mediaType;
     } else if (isBlob(options.body)) {
       headers["Content-Type"] = options.body.type || "application/octet-stream";
-    } else if (false) {
-      headers["Content-Type"] = "text/plain";
     } else if (!isFormData(options.body)) {
       headers["Content-Type"] = "application/json";
     }
@@ -155,7 +153,7 @@ const getHeaders = async (config, options) => {
 };
 
 const getRequestBody = (options) => {
-  if (options.body) {
+  if (options.body !== undefined) {
     return JSON.stringify(options.body);
   }
 };
