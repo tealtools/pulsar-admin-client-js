@@ -210,6 +210,7 @@ const getResponseBody = async (response) => {
   return undefined;
 };
 const catchErrorCodes = (options, result) => {
+  // Provide better error messages for Pulsar client.
   if (result.status > 300 && result.body !== undefined) {
     const reason = result.body.reason;
     if (
